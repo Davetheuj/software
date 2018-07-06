@@ -1,0 +1,2729 @@
+package game;
+
+import javafx.application.Application;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.*;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
+import javafx.scene.layout.BackgroundSize;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.text.Font;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
+import java.awt.GridLayout;
+import java.beans.FeatureDescriptor;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.concurrent.ThreadLocalRandom;
+
+import game.NPC;
+import game.Weapon;
+
+
+public class GameStart extends Application {
+
+	Stage window; // declaring a new stage called window, it will be our
+					// primaryStage.
+	Scene startScreen, gameScreen, loadScreen; // declaring scenes, although loadScreen isn't used yet (will be used for loading files)
+	TextArea menuInfo3 = new TextArea();
+	TextArea menuInfo2 = new TextArea();
+	TextArea menuInfo = new TextArea();
+	TextArea info = new TextArea("--------Welcome to Valgnar--------\n");
+	TextField entry = new TextField("");
+	String musicFile;
+	Media sound;
+	MediaPlayer mediaPlayer;
+	String musicFile2;
+	Media sound2;
+	MediaPlayer mediaPlayer2;
+	
+	String welcomeText; //This changes based on the players chosen race
+	Boolean dayBool = true; //is the sun going to rise or set?
+	Boolean sunBool = true; //unused
+	double checkTime; //stores the last instance of checked time (usually)
+	double gameTime; //stores the current game time, calculated after every <enter> keystroke
+	NumberFormat formatter = new DecimalFormat("#0.00"); //formats times
+	int days = 0; //YOU NEED TO INITIALIZE THIS WITH INITIALIZENEW(); OTHERWISE IT WILL THROW OFF SAVED FILES
+	
+	String areaInfo = new String();
+	Area[] allAreas = new Area[900]; 
+	Area currentArea;
+	
+	Weapon[] inventoryWeapons = new Weapon[10];
+	Armor[] inventoryArmor = new Armor[10];
+	Armor[] areaArmor = new Armor[50];
+	Armor[] allArmor = new Armor[500];
+	Armor equippedHead;
+	Armor equippedLegs;
+	Armor equippedChest;
+	Armor equippedGloves;
+	Armor equippedFeet;
+	Armor equippedAmulet;
+	Armor equippedRing;
+	Armor equippedShield;
+	Armor equippedBack;
+	Weapon equippedWeapon;
+	
+	Item[] inventoryItems = new Item[10];
+	Item[] areaItems = new Item[50];
+	Item[] allItems = new Item[500];
+	int invCounter = 0;
+	int inventoryWeaponsCounter = 0;
+	int inventoryArmorCounter = 0;
+	int inventoryItemsCounter = 0;
+	int gold = 0;
+	NPC[] party = new NPC[10];
+	int partyCounter = 0;
+	Weapon[] areaWeapons = new Weapon[50];
+	
+	Weapon[] allAreaWeapons = new Weapon[50];
+	
+	NPC[] areaNPCs = new NPC[50];
+	NPC[] allAreaNPCs = new NPC[500];
+	NPC currentNPC; // The NPC That is being talked to
+	NPC[] enemies = new NPC[10];
+	int areaEnemiesCounter =0;
+	NPC currentTarget;
+	
+	
+	Ability[] allAbilities = new Ability[100];
+	int abilityCounter = 0;
+	Ability[] playerAbilities = new Ability[100];
+	
+	
+	
+	
+	
+	
+	Boolean chatBool = false; //chatBool controls the player commands, false for normal game commands, true for within chat
+	String playerName;
+	String playerRace;
+	String playerSex;
+	int hp;
+	int currentHp;
+	int mana;
+	int fatigue;
+	int combatNoise;
+	
+	int strength;
+	int wisdom;
+	int intelligence;
+	int dexterity;
+	int charisma;
+	int resolve;
+	int stealth;
+	int speed;
+	int luck;
+	int stamina;
+	int spirit;
+	
+	int renown;
+	int honor;
+	int popularity;
+	
+	
+	int locX = 0; //PLAYER POSITION OR LOOK POSITION MOMENTARILY
+	int locY = 0;//PLAYER POSITION OR LOOK POSITION MOMENTARILY
+	int locZ = 0;
+	double startTime; //THIS IS SET IN INITIALIZENEW();
+	
+	//Stuff for quest log display
+	int playerQuestCounter = 0;
+	Quest[] quests = new Quest[20];
+	Boolean equipBool = new Boolean(false);
+	Boolean notesBool = new Boolean(false);
+	Boolean inventoryBool = new Boolean(false);
+	Boolean abilitiesBool = new Boolean(false);
+	Boolean questBool = new Boolean(false);
+	Boolean partyPanelBool = new Boolean(false);
+	Boolean combatBool = new Boolean(false);
+	String notes = new String("-----Notes------\n");	
+			
+	Boolean statsBool =false;
+	String statsText = "----Character Statistics----\n"
+			+ "	 ----General Stats----\n"
+			+ "Name: " + playerName + "\nRace: " + playerRace +"\nTitle:\n"
+					+ "Max Hitpoints: "+(int) ((stamina * 30) + (resolve*15) + (15*luck*Math.random()))+"\nCurrent Hitpoints: " + currentHp + "\nMana: " + (int) ((intelligence * 50) + (wisdom * 50) + (spirit * 100)) +"\nFatigue: " + fatigue +"\n"
+			+ "      ----Core Stats----\nStrength: " + strength +"\nIntelligence: " + intelligence+""
+					+ "\nStamina: "+stamina+"\nDexterity: "+dexterity+ "\nCharisma: "+charisma+""
+			+ "\nSpirit: "+spirit+"\nWisdom: "+wisdom+"\nLuck: "+luck+"\nSpeed: "+speed+""
+				+ "\nStealth: "+stealth+"\nResolve: "+resolve+"\n     ----World Stats----\n"
+			+ "Renown: "+renown+"\nHonor: "+honor+"\nPopularity: "+popularity+"\n"
+			+ "	  ----Guilds----\n";
+	
+	//--------------------------------------------------------------------------------------------------------------------------------------------------
+	String statsKey = "stats";						//THIS SHOULD BE A COMPLETE LIST OF ALL USER COMMANDS [KEY STRINGS]
+	String helpKey = "help";
+	String invKey = "inventory";
+	String notesKey = "notes";
+	String timeKey = "timeplayed";
+	String addNotesKey = "addnotes";
+
+	String questsKey = "quests";
+	String walkNorthKey = "walk north";
+	String walkEastKey = "walk east";
+	String walkSouthKey = "walk south";
+	String walkWestKey = "walk west";
+	String abilitiesKey = "abilities";
+	String equipmentKey = "equipment";
+	String partyKey = "party";
+	String lookHereKey = "look here";
+	String lookNorthKey = "look north";
+	String lookSouthKey = "look south";
+	String lookWestKey = "look west";
+	String lookEastKey = "look east";
+	String talkToKey = "talk to";
+	String homeKey = "home";
+	String equipKey = "equip ";
+	String getKey = "get ";
+	String dropKey = "drop ";
+	String unequipKey = "unequip ";
+	double timePlayed;
+	//---------------------------------------------------------------------------------------------------------------------------------
+	
+	public static void main(String[] args) { // this is included in all javafx
+												// apps
+		launch(args);
+	}
+
+	@Override
+	public void start(Stage primaryStage) {
+		
+         
+		
+		
+		
+		
+		window = primaryStage; // sets window to primary stage
+		window.setTitle("Third Partition"); // sets title
+		window.centerOnScreen();
+		window.setOnCloseRequest(e -> {
+			e.consume(); // consumes the window close request, allows manual
+							// direction
+			display("Exit", "Are you sure you'd like to quit?");
+			if (answer) {
+				window.close();
+			}
+		});
+		// GRAPHICS FOR START SCREEN
+		
+		
+		BackgroundSize size = new BackgroundSize(50,50, true, true,true, true);
+		Image startImage = new Image("game/Resources/background4.jpg");
+		BackgroundImage startBackgroundImage = new BackgroundImage(startImage,null,null,null, size);
+		Background backGround = new Background(startBackgroundImage);
+		
+		Image menuInfoImage = new Image("game/Resources/scrollimage.jpg");
+		BackgroundImage menuInfoBackgroundImage = new BackgroundImage(menuInfoImage, null, null, null, size);
+		Background menubackGround = new Background(menuInfoBackgroundImage);
+		
+		Image gameMapImage = new Image("game/Resources/worldmaprough2.png");
+		ImageView gameMap = new ImageView();
+         gameMap.setImage(gameMapImage);
+		
+         Image healthManaImage = new Image("game/Resources/manahealthbox.png");
+		ImageView healthMana = new ImageView();
+		healthMana.setImage(healthManaImage);
+         
+		VBox startBorder = new VBox(20);
+		
+		startBorder.setAlignment(Pos.CENTER);
+		startBorder.setBackground(backGround);
+		
+
+		Button startSceneStart = new Button("Start New Game");
+		startSceneStart.setOpacity(.75);
+		
+		Button startSceneLoad = new Button("Load a previous save");
+		startSceneLoad.setOpacity(.75);
+		Button startSceneHelp = new Button("Game Info");
+		startSceneHelp.setOpacity(.75);
+		startBorder.getChildren().addAll(startSceneStart, startSceneLoad, startSceneHelp);
+		
+		startScreen = new Scene(startBorder, 600, 500);
+		// GRAPHICS FOR GAME SCREEN
+		BorderPane gameBorder = new BorderPane();
+	Date now2 =	new GregorianCalendar().getTime();
+		
+	new SimpleDateFormat("HH:mm").format(now2);
+	StackPane gameStack = new StackPane();
+		Date now = new Date();
+		VBox gameText = new VBox();
+		gameText.setPadding(new Insets(0, 0, 10, 0));
+		
+		
+		HBox infoAndHealth = new HBox();
+		info.setEditable(false);
+		info.setPrefHeight(350);
+		info.setMaxWidth(1000);
+		info.setMinWidth(1000);
+		info.setWrapText(true);
+		info.getStylesheets().add
+		 (GameStart.class.getResource("infobackground.css").toExternalForm());
+		HBox topMenu = new HBox();
+		
+		menuInfo.setScrollTop(0);
+		menuInfo.setEditable(false);
+		menuInfo.setBackground(menubackGround);
+		menuInfo.setMinSize(200, 399);
+		menuInfo.setMaxSize(200, 399);
+		menuInfo.getStylesheets().add
+		 (GameStart.class.getResource("GameCSS.css").toExternalForm());
+		
+		
+		
+		menuInfo2.setBackground(menubackGround);
+		menuInfo2.setEditable(false);
+
+		menuInfo2.setMinSize(200, 399);
+		menuInfo2.setMaxSize(200, 399);
+		menuInfo2.setScrollTop(0);
+		menuInfo2.getStylesheets().add
+		 (GameStart.class.getResource("GameCSS.css").toExternalForm());
+		
+		
+		menuInfo3.setEditable(false);
+		menuInfo3.setBackground(menubackGround);
+		menuInfo3.setMinSize(200, 399);
+		menuInfo3.setMaxSize(200, 399);
+		menuInfo3.setScrollTop(0);
+		menuInfo3.getStylesheets().add
+		 (GameStart.class.getResource("GameCSS.css").toExternalForm());
+		
+		topMenu.getChildren().addAll(menuInfo, menuInfo2, menuInfo3,gameMap);
+		infoAndHealth.getChildren().addAll(info, healthMana);
+		VBox escMenu = new VBox();
+
+		
+
+		gameText.getChildren().addAll(infoAndHealth, entry);
+		gameBorder.setTop(topMenu);
+		gameBorder.setCenter(gameStack);
+		gameBorder.setBottom(gameText);
+		
+
+		gameScreen = new Scene(gameBorder, 1384, 777);
+		//Quest DECLERATIONS
+		
+		Quest thomas1 = new Quest("Nasty Business", "Investigate the area around the Monestary for traces of misconduct and report back to me.\n",false,false,1);
+		
+		//NPC DECLERATIONS
+		 NPC fred = new NPC(0,0,0,"Fred","human","A Farmer","1: Who are you? \n2: What are you doing?\n11: Do you have any quests for me?\n12: Will you join my party?\n", "The name's Fred, I've lived outside"
+		 		+ " this monestary for most of my life.\n","I'm just on my way to the daily sermon, you should join me to the south in the Prayer Hall.\n","","","","","","","","", false,10,10,1,1,true,false,null,null,null,0,0);
+		fred.setTradeBool(true);	
+		 allAreaNPCs[0] = fred;
+			
+			Item[] fredsItems = new Item[20];
+			NPC thomas = new NPC(0,0,0,"Senior Sergeant Thomas","human","A Knight.","1: Who are you? \n2: What are you doing?\n11: Do you have any quests for me?\n12: Will you join my party?\n", "Senior Sergeant Thomas at your service. " +
+			  "I represent the Duke Yillran." , "I'm here on a...nasty business. You see normally this is a peaceful monestary, tucked away" +
+			  "in the forest, not seeing travellers for days at a time. But lately there has been a rash of violence, " +
+			  "brothers and sisters have gone missing, only to come back stark naked, and raving mad telling stories of " +
+			  "abduction, torture, and strange rituals. I'm here on behalf of Duke Yillran to investigate these matters, as this land is in his " +
+			  "fiefdom.\n",
+			  "","","","","","","","",false,10,10,1,1,true,false,thomas1,null,null,1,1);
+					  
+			allAreaNPCs[1] = thomas;
+			/*NPC dominik = new NPC(0,0,"Dominik","He sells things.",false,10,10,1,1,true,false);
+			allAreaNPCs[2] = dominik;
+			NPC withers = new NPC(0,1,"Old Man Withers","A quirky fella.",false,10,10,1,1,true,false);
+			allAreaNPCs[3] = withers;*/
+			NPC gannon = new NPC(0,-1,0,"Barkeep Gannon","human", "Blonde, short hair neatly coiffured to reveal a chiseled, radiant face."
+					+ " Narrow hazel eyes, set low within their sockets, watch attentively over the bar he's kept for so long.", "1: Who are you? \n2: What are you doing?\n11: Do you have any quests for me?\n12: Will you join my party?\n",  null, null, null, null, null, null, null, null, null, null, false,900,900,900,900,true,false, null, null, null, 0, 5);
+		   allAreaNPCs[4] = gannon;
+		 //ARMOR DECLErATIONS
+		Armor woolenChest = new Armor(0,0,0,"Woolen Chest", "A nicely woven woolen vest to keep you warm at night.","chest",false,0,0,0,0,0,20,45);
+		Armor woolenLegs = new Armor(0,0,0,"Woolen Leggings", "A nicely pair of woolen leggings to keep nasty gnats away at sundown.","legs",false,0,0,0,0,0,20,45);
+		allArmor[0] = woolenChest;
+		allArmor[1] = woolenLegs;
+		equippedChest = woolenChest;
+		equippedLegs = woolenLegs;
+		//ITEM DECLERATIONS
+		Item silverNecklace = new Item(0,3,0,"Silver Necklace", "A shiny silver necklace covered in mud", true,20,50);	
+		allItems[1] = silverNecklace;
+		//WEAPON DECLERATIONS
+		Weapon bow = new Weapon(0, 0,0, "bow", "a bow", "bow", true, 0,5,0,0,0,20,45);
+		allAreaWeapons[1] = bow;
+		fredsItems[0] = silverNecklace;
+		fred.setNPCInventoryItems(fredsItems);
+		Weapon[] fredsWeapons = new Weapon[20];
+		fredsWeapons[0] = bow;
+		fred.setNPCInventoryWeapons(fredsWeapons);
+		Weapon axe = new Weapon(0, 0, 0,"axe", "an axe", "axe",true, 10,5,0,0,0,20,45);
+		allAreaWeapons[2] = axe;
+		Weapon axe2 = new Weapon(0, 1,0, "axe", "an axe", "axe", true, 10,5,0,0,0,20,45);
+		allAreaWeapons[3] = axe2;
+		
+		
+		//AREA DECLERATIONS
+		Area area1 = new Area(0,0,0,true,true,false,true,"src/game/Resources/ChurchBell00.mp3","A brightly lit courtyard.\n\n The crimson banners with the golden seal of Saelsine flow lazily in the breeze atop the "
+				+ "high turrets of this fortified monestary. An aroma of tiger lily "
+				+ "fills the courtyard and the sounds of children laughing in the distance permeates the air. Several men stand near the exit gate to the North, talking in a tightly-knit group."
+				+ " Still others, Monestary Brothers and Maidens hurry to and fro, from inside the large church to the South, completing their pious works or assisting in more mundane labours. "
+				+ "\n",false,false,false);
+		allAreas[0] = area1;
+		Area area2 = new Area(0,1,0,true,true,true,true,"src/game/Resources/meadowlark_daniel-simion.mp3","The monestary entrance gate.\n\n"
+				+ "Two guards wearing tabards of crimson and gold stand at attention on either side of the portcullis and greet you warmly. There is a wooden stand with a flier on it that says WANTED "
+				+ "positioned neatly besides a square wooden allotment trough, currently filled with what appears to be cucumbers. Chatter bubbles forth from inside the Monestary"
+				+ " can be heard faintly. \n",true,true,false);
+		allAreas[1] = area2;
+		Area area3 = new Area(0,2,0,true,true,true,true,"src/game/Resources/NatureAmbiance.mp3","A winding walkway.\n\n"
+				+ "A heavily worn dirt path winds through the dank undergrowth of this magnificent and well-traveled pine forest. Birds chatter and a squirrels play their games high within the winding branches."
+				+ "There are small wooden benches and the occasional lantern spread every so often that might be needed by a traveler caught astray at night. \n",true,true,false);
+		allAreas[2] = area3;
+		Area area4 = new Area(0,3,0,true,true,true,true,"src/game/Resources/Water-Lisa_Redfern-1888623835.mp3","A cobbled road along the creek.\n\n"
+				+ "The road takes the course of the creek winding it's way through humid ferns and thick trunks, towering high above you. Fish jump"
+				+ "merrily in the sparkling clear waters. Diamonds of light dance in time with the swelling and gushing of the turbulent water. "
+				+ " Large granite boulders jut precariously above the embankment, smoothed by time and weather."
+				+ " \n",true,false,true);
+		allAreas[3] = area4;
+		Area area5 = new Area(0,4,0,true,true,true,true,"src/game/Resources/NatureAmbiance.mp3","A fork in the roads.\n\n"
+				+ "A sign post sits at the top of this grassy knoll under the shade of a magnificent poplar.\n"
+				+ "North: Fairshire, Brillion.\n"
+				+ "East: The Bay of Kings.\n"
+				+ "South: Fairshire Monestary, Surpointe.\n"
+				+ "West: Winder's Heights.\n"
+				+ "You can see the town of Fairshire in the distance to the north, a mediocre smattering of cottages puffing smoke from wood-fires and a few larger buildings; penned in "
+				+ "by a short retaining wall of water-smoothe stones stacked and fortified with planks of nailed wooden beams.\n"
+				,true,false,false);
+		allAreas[4] = area5;
+	Area area6 = new Area(0,5,0,true,true,true,true,"src/game/Resources/meadowlark_daniel-simion.mp3","The gate to Fairshire.\n\n"
+			+ "A finely cobbled road winds its way through the countryside outside of Fairshire, eventually landing at the town's sturdy Southern wooden gates. Long and soft rollings hills"
+			+ "of emerald green grass sweeps in all directions, a sea of fertility in which the fauna thrives. Two guards, probaby town militia, stand at attention inspecting travellers as they enter."
+			+ "The town of Fairshire is to the North. A cobbled road runs South. There is countryside to the East and West.\n"
+			+ ""
+			+ ""
+			+ "",true,false,false);
+	    allAreas[5] = area6;
+//		Area area7 = new Area(0,6,true,true,true,true,"A Bustling Street.\n\n",,true,false,true);
+//		allAreas[6] = area7;
+//		Area area8 = new Area(0,7,true,true,true,true,"A bustling street\n\n",,true,false,true);
+//		allAreas[7] = area8;
+//		Area area9 = new Area(0,8,true,true,true,true,,,true,false,true);
+//		allAreas[8] = area9;
+//		Area area10 = new Area(0,9,true,true,true,true,,,true,false,true);
+//		allAreas[9] = area10;
+//		Area area11 = new Area(0,10,true,true,true,true,,,true,false,true);
+//		allAreas[10] = area11;
+//		Area area12 = new Area(0,11,true,true,true,true,,,true,false,true);
+//		allAreas[11] = area12;
+//		Area area13 = new Area(0,12,true,true,true,true,,,true,false,true);
+//		allAreas[12] = area13;
+//		Area area14 = new Area(0,13,true,true,true,true,,,true,false,true);
+//		allAreas[13] = area14;
+//		Area area15 = new Area(0,14,true,true,true,true,,,true,false,true);
+//		allAreas[14] = area15;
+//		Area area16 = new Area(0,15,true,true,true,true,,,true,false,true);
+//		allAreas[15] = area16;
+//		Area area17 = new Area(0,16,true,true,true,true,,,true,false,true);
+//		allAreas[16] = area17;
+		Area area18 = new Area(1,-1,0,false,false,false,true,"src/game/Resources/Church Ambiance-SoundBible.com-1658113405.mp3",
+				"The Monestary dormitories.\n"
+				+ "This room is a dormitory filled with a smattering of cots, each with matching brown wool blankets and clean white linens."
+				+ " Light flickers off the walls from several torches contained within wrought iron brackets, casting deep shadows around the bedframes and"
+				+ " wooden lockers at the foot of each bed. \n",false,false,false);
+		allAreas[17] = area18;
+		Area area19 = new Area(0,-1,0,true,true,true,true,
+				"src/game/Resources/Church Ambiance-SoundBible.com-1658113405.mp3","The Prayer Hall entrance.\n\n"
+						+ "A small room with high arching hard-wood rafters, lit with a grand chandelier of mosacially crafted multi-colored glass casting vibrant hues of deep purples and blue."
+						+ "There are several deep stone passages leading out of the room and you can hear a voice emanting from the South, it appears a sermon might be in progress.\n",false,false,false);
+		allAreas[18] = area19;
+		Area area20 = new Area(-1,0,0,false,false,true,false,"src/game/Resources/Church Ambiance-SoundBible.com-1658113405.mp3","A finely kept inn.\n\n"
+				+ "A fire crackles cheerfully on the rounded stone hearth, scattering light and life throughout this humble inn, occasinally catching the hilt of a burnished"
+				+ "brass blade hanging behind the bar. Scents of hearty stew with a hint of fresh coney and 'taters waft in the air, probably tonight's dinner."
+				+ "The innkeeper stands behind the bar conversing with a few patrons seated on high-set wooden stools\n",false,false,false);
+		allAreas[19] = area20;
+		Area area21 = new Area(-1,-1,0,false,false,true,false,"src/game/Resources/Church Ambiance-SoundBible.com-1658113405.mp3",
+				"Stairs to the belfry.\n\n"
+				+ "A winding wooden walk spirals upwards precariously, to the belfry high above.\n",false,false,false);
+		allAreas[20] = area21;
+		Area area22 = new Area(0,-2,0,true,false,false,false,"src/game/Resources/winstonchurch.mp3","The Prayer Hall.\n\n"
+				+ "A large hall stretches before you, filled with rows of pews occupied by the many pious denziens. Father Gurny stands at the head of the hall on a raised plinth"
+				+ "doing his best to give his peoples a sense of security, purpose, and meaning in this fateful world. High above you, vaulting into the air, rest the oldest stories"
+				+ "known to men. Stained glass illustrates the coming of Man to Perth, the Origin wars, the Rise of the King, and other stories even infants know by heart.\n",false,false,false);
+		allAreas[21] = area22;
+	//	Area area23 = new Area(0,-3,true,true,true,true,,,true,false,true);
+	//	allAreas[22] = area23;
+	//	Area area24 = new Area(0,-3,true,true,true,true,,,true,false,true);
+	//	allAreas[23] = area24;
+	//ABILITIY DECLERATIONS
+		Ability attack = new Ability("Attack", 0, true, true,55);
+		allAbilities[0] = attack;
+		Ability defend = new Ability("Defend", 1, true, true,0);
+		allAbilities[1] = defend;
+		Ability mark = new Ability("Mark",2,false,false,0);
+		allAbilities[2] = mark; 
+		Ability fireBlast = new Ability("Fire Blast", 3, false, false,50);
+		allAbilities[3] = fireBlast; 
+		Ability flee = new Ability("Flee", 4, true, true,0);
+		allAbilities[4] = flee;
+		Ability lesserHeal = new Ability("Lesser Heal", 5, true, false,0);
+		allAbilities[5] = lesserHeal;
+		Ability greaterHeal = new Ability("Greater Heal", 6, true,false,0);
+		allAbilities[6] = greaterHeal;
+		
+		
+		//Start screen music
+		String musicFileStart = "/Users/davidunderwood-jett/Documents/Javworkspace/3PText2/src/game/Resources/CrispOceanWaves.mp3";     // For example
+
+		Media soundStart = new Media(new File(musicFileStart).toURI().toString());
+		MediaPlayer mediaPlayerStart = new MediaPlayer(soundStart);
+		mediaPlayerStart.play();
+		mediaPlayerStart.setCycleCount(4);
+		mediaPlayerStart.setVolume(.1);
+		
+		
+		String musicFileStart2 = "src/game/Resources/compilation.aif";
+		Media soundStart2 = new Media(new File(musicFileStart2).toURI().toString());
+		MediaPlayer mediaPlayerStart2 = new MediaPlayer(soundStart2);
+		mediaPlayerStart2.play();
+		
+		
+		
+		startSceneStart.setOnAction(e -> {
+			
+			
+			
+			initializeNew();
+			updateInventory();
+			updateEquipment();
+			for(int i = 0; i < 100; i++){
+				try{if(allAbilities[i].getIsLearned()){
+					playerAbilities[abilityCounter] = allAbilities[i];
+					abilityCounter++;
+				}}catch(NullPointerException d){}
+			}
+			
+			
+			
+			menuInfo.setText("----Character Statistics----\n"
+			+ "	 ----General Stats----\n"
+			+ "Name: " + playerName + "\nRace: " + playerRace +"\nTitle:\n"
+					+ "Maximum Hitpoints: "+hp+ "\nCurrent Hitpoints: "+currentHp+"\nMana: " + mana +"\nFatigue: " + fatigue +"\n"
+			+ "      ----Core Stats----\nStrength: " + strength +"\nIntelligence: " + intelligence+""
+					+ "\nStamina: "+stamina+"\nDexterity: "+dexterity+ "\nCharisma: "+charisma+""
+			+ "\nSpirit: "+spirit+"\nWisdom: "+wisdom+"\nLuck: "+luck+"\nSpeed: "+speed+""
+				+ "\nStealth: "+stealth+"\nResolve: "+resolve+"\n\n    ----World Stats----\n"
+			+ "Renown: "+renown+"\nHonor: "+honor+"\nPopularity: "+popularity+"\n"
+			+ "	  ----Guilds----\n");
+			statsBool = true;
+			equipBool = true;
+			inventoryBool = true;
+			
+	menuInfo.setScrollTop(0);
+	
+			mediaPlayerStart.stop();
+			startTime =  (System.nanoTime() / 1000000000);
+			System.out.println(startTime);
+			window.setScene(gameScreen);
+			window.centerOnScreen();
+			info.setText(welcomeText);
+		});
+		
+		entry.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event){
+				if (event.getCode() == KeyCode.ENTER){
+					
+					
+					menuInfo3.setEditable(false);
+					String toTextArea;
+					toTextArea=entry.getText();			
+					info.appendText(toTextArea + "\n");
+					
+					if(notesBool){
+						notes = menuInfo3.getText();
+						notesBool= false;
+						info.appendText("Your notes have been saved.\n");
+					}
+					
+					
+					if(combatBool){
+						
+						//COMMANDS TO USE Abilities
+						if(entry.getText().startsWith("use ")){
+							Ability usedAbility = null;
+							for(int i = 0; playerAbilities[i] != null; i++){
+								
+								try{
+								if(entry.getText().contentEquals("use "+ playerAbilities[i].getName())){
+									usedAbility = playerAbilities[i];
+								}}catch(NullPointerException e){}
+							}
+							
+							System.out.println(calculateDamagePrimary(usedAbility));
+						}
+					
+					
+					
+					
+					
+					}
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					if(chatBool == false && combatBool == false){ //CHATBOOL CONTROLS WETHER OR NOT COMMANDS ARE FOR BASE GAMEPLAY OR WITHIN A TALK SCENARIO
+						//Walk music								//COMBATBOOL CONTROLS COMBAT COMMANDS
+						
+						String walkFile = "src/game/Resources/Walking.aif";
+						Media walkStart = new Media(new File(walkFile).toURI().toString());
+						MediaPlayer walkSoundPlayer = new MediaPlayer(walkStart);
+						walkSoundPlayer.setVolume(.4);
+						
+						
+						
+						//STATS
+					
+						
+				
+					//STATS
+					if(entry.getText().contentEquals(statsKey)){
+						statsBool = true;
+						abilitiesBool = false;
+						updateStats();
+						
+					}
+					//HELP
+					else if(entry.getText().contentEquals(helpKey)){
+						info.appendText("-------------------HELP-------------------\n"
+								+ "Remember, all base commands are always lowercase!\n\n"
+								
+								+ "Commonly Used Commands:\n"
+								+ "----------------------------------------------------\n"
+								+ "\nMovement and Interaction Commands:\n"
+								+ "get [item] -> <get Axe of Sorrow> Picks up the specified item off the ground.\n"
+								+ "equip [armor/weapon] -> <equip Axe of Sorrow> Equips the specified item in your inventory.\n"
+								+ "unequip [armor/weapon] -> <unequip Axe of Sorrow> Unequipes the specified item."
+								+ "drop [item] -> <drop Axe of Sorrow> Drops the specified item from your inventory.\n"								
+								+ "walk [direction] -> <walk north> Moves your character in that direction.\n"
+								+ "look [direction] -> <look here> Inspects the directed area.\n"
+								+ "talk to [npc name] -> <talk Farmer Ned> Talks to the directed npc.\n"
+								+ "home -> teleports you to your home destination, use this if you are lost or stuck!\n"
+								
+								+ "----------------------------------------------------\n"
+								+"Panel and Information Commands:\n"
+								+ "stats -> Shows character statistics.\n"
+								+ "inventory -> opens your inventory panel\n"
+								+ "quests -> opens your quest log\n"
+								+ "equipment -> opens an equipment panel\n"
+								+ "abilities -> opens up an abilities panel\n"
+								+ "notes -> opens your notes panel\n"
+								+ "party -> opens your party panel\n"
+								+ "----------------------------------------------------\n"
+								+"Helpful Commands:\n"
+								+ "addnotes -> allows you to view and edit your notes panel\n"
+								+ "timeplayed -> displays how long you've been playing\n"
+								+ "-----------------------------------------------------\n"
+								);
+						
+					}
+					//ABILITIES
+					else if(entry.getText().contentEquals(abilitiesKey)){
+						menuInfo.setText("-----Abilities------\n");
+						int i =0;
+						while(playerAbilities[i] != null){
+							menuInfo.appendText(playerAbilities[i].getName() + "\n");
+						i++;
+						}
+						
+						abilitiesBool = true;
+						statsBool = false;
+					}
+					//EQUIPMENT
+					else if(entry.getText().contentEquals(equipmentKey)){
+						notesBool = false;
+						equipBool = true;
+						updateEquipment();						
+					}
+					//GET
+					else if (toTextArea.startsWith(getKey)){ 
+						
+						for(int i = 0; i <= 10; i++){try{
+							if(toTextArea.contentEquals(getKey + areaWeapons[i].getName())){
+								if(areaWeapons[i].getVisiBool()){
+								info.appendText("You pick up the " + areaWeapons[i].getName() +"\n");
+								inventoryWeapons[inventoryWeaponsCounter] = areaWeapons[i]; 
+								areaWeapons[i].setVisiBool(false);
+								inventoryWeaponsCounter++;
+								break;}
+							}
+						}catch(NullPointerException e){		}
+					}
+						
+						for(int i = 0; i < 10; i++){try{
+							if(toTextArea.contentEquals(getKey + areaArmor[i].getName())){
+								if(areaArmor[i].getVisiBool()){
+								info.appendText("You pick up the " + areaArmor[i].getName() +"\n");
+								inventoryArmor[inventoryArmorCounter] = areaArmor[i]; 
+								areaArmor[i].setVisiBool(false);
+								inventoryArmorCounter++;
+								break;}
+							}
+						}catch(NullPointerException e){		}
+					}
+						
+						for(int i = 0; i <= 10; i++){try{
+							if(toTextArea.contentEquals(getKey + areaItems[i].getName())){
+								if(areaItems[i].getVisiBool()){
+								info.appendText("You pick up the " + areaItems[i].getName() +"\n");
+								inventoryItems[inventoryItemsCounter] = areaItems[i]; 
+								areaItems[i].setVisiBool(false);
+								inventoryItemsCounter++;
+								break;}
+							}
+						}catch(NullPointerException e){		}
+					}
+					if(inventoryBool){
+						updateInventory();
+					}
+					}
+					//DROP
+					else if (toTextArea.startsWith(dropKey)){ 
+						
+						for(int i = 0; i <= inventoryWeaponsCounter; i++){try{
+							
+							if(toTextArea.contentEquals(dropKey + inventoryWeapons[i].getName())){
+								info.appendText("You drop the " + inventoryWeapons[i].getName() + "\n");
+								inventoryWeapons[i].setLocX(locX);
+								inventoryWeapons[i].setLocX(locZ);
+								inventoryWeapons[i].setLocY(locY);
+								inventoryWeapons[i].setVisiBool(true);
+								inventoryWeapons[i] = null;
+								for(int c = i;c == inventoryWeaponsCounter; c++){
+								try{inventoryWeapons[c] = inventoryWeapons[c+1];}catch(NullPointerException e){} 
+								}
+								 inventoryWeaponsCounter--;
+								break;
+							}
+						}catch(NullPointerException e){		}
+						
+					}
+						for(int i = 0; i <= inventoryArmorCounter; i++){try{
+							if(toTextArea.contentEquals(dropKey + inventoryArmor[i].getName())){
+								info.appendText("You drop the " + inventoryArmor[i].getName() + "\n");
+								inventoryArmor[i].setLocX(locX);
+								inventoryArmor[i].setLocX(locZ);
+								inventoryArmor[i].setLocY(locY);
+								inventoryArmor[i].setVisiBool(true);
+								inventoryArmor[i] = null;
+								for(int c = i;c <= inventoryArmorCounter; c++){
+								try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+								}
+								inventoryArmorCounter--;
+								break;
+							}
+						}catch(NullPointerException e){		}
+					}
+						
+						for(int i = 0; i <= inventoryItemsCounter; i++){try{
+							if(toTextArea.contentEquals(dropKey + inventoryItems[i].getName())){
+								info.appendText("You drop the " + inventoryItems[i].getName() + "\n");
+								inventoryItems[i].setLocX(locX);
+								inventoryItems[i].setLocY(locY);
+								inventoryItems[i].setLocZ(locZ);
+								inventoryItems[i].setVisiBool(true);
+								inventoryItems[i] = null;
+								for(int c = i;c <= inventoryItemsCounter; c++){
+								try{inventoryItems[c] = inventoryItems[c+1];}catch(NullPointerException e){} 
+								}
+								inventoryItemsCounter--;
+								break;
+							}
+						}catch(NullPointerException e){		}
+					}
+						if(inventoryBool){
+							updateInventory();
+						}
+					}
+					//EQUIP
+					else if(toTextArea.startsWith(equipKey)){ 
+						for(int i = 0; i <= inventoryWeaponsCounter; i++){try{
+							if(toTextArea.contentEquals(equipKey + inventoryWeapons[i].getName())){
+								inventoryWeapons[inventoryWeaponsCounter] = equippedWeapon; //inventoryweapon[1] is null
+								equippedWeapon = inventoryWeapons[i];
+								if(equipBool){
+											updateEquipment();}
+								info.appendText("You equip the " + inventoryWeapons[i].getName() + "\n");
+								inventoryWeapons[i] = null; //inventoryWeapons[0]is null
+								for(int c = i;c <= inventoryWeaponsCounter; c++){
+								try{inventoryWeapons[c] = inventoryWeapons[c+1];}catch(NullPointerException e){} 
+								}
+								
+								
+							}
+							
+					}catch(NullPointerException e){}
+						}
+						for(int i = 0; i <= inventoryArmorCounter; i++){try{
+							if(toTextArea.contentEquals(equipKey + inventoryArmor[i].getName())){
+								String compare = inventoryArmor[i].getSlot();
+								if(compare == "head"){
+									inventoryArmor[inventoryArmorCounter] = equippedHead;
+									equippedHead = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "chest"){
+									inventoryArmor[inventoryArmorCounter] = equippedChest;
+									equippedChest = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "legs"){
+									inventoryArmor[inventoryArmorCounter] = equippedLegs;
+									equippedLegs = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "neck"){
+									inventoryArmor[inventoryArmorCounter] = equippedAmulet;
+									equippedAmulet = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = equippedAmulet;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "feet"){
+									inventoryArmor[inventoryArmorCounter] = equippedFeet;
+									equippedFeet = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+									
+								}
+								else if(compare == "ring"){
+									inventoryArmor[inventoryArmorCounter] = equippedRing;
+									equippedRing = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "gloves"){
+									inventoryArmor[inventoryArmorCounter] = equippedGloves;
+									equippedGloves = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "shield"){
+									inventoryArmor[inventoryArmorCounter] = equippedShield;
+									equippedShield = inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+								else if(compare == "back"){
+									inventoryArmor[inventoryArmorCounter] = equippedBack;
+									equippedBack
+									= inventoryArmor[i];
+									info.appendText("You equip the " + inventoryArmor[i].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									inventoryArmor[i] = null;
+									for(int c = i;c <= inventoryArmorCounter; c++){
+									try{inventoryArmor[c] = inventoryArmor[c+1];}catch(NullPointerException e){} 
+									}
+									inventoryArmorCounter--;	
+								}
+							}			
+							}
+						catch(NullPointerException e){}}
+						if(inventoryBool){
+							updateInventory();
+						}
+					
+					}
+					
+					
+					//UNEQUIP
+					else if(toTextArea.startsWith(unequipKey)){ 
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedWeapon.getName())){
+								inventoryWeapons[inventoryWeaponsCounter] = equippedWeapon; 
+								inventoryWeaponsCounter++;
+								equippedWeapon = null;
+								
+								if(equipBool){
+											updateEquipment();}
+								if(inventoryBool){
+									updateInventory();
+								}
+								info.appendText("You unequip the " + inventoryWeapons[inventoryWeaponsCounter - 1].getName() + "\n");
+								
+							}
+							
+					}catch(NullPointerException e){}
+						
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedHead.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedHead;
+									inventoryArmorCounter++;
+									equippedHead = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter - 1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedChest.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedChest;
+									inventoryArmorCounter++;
+									equippedChest = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter - 1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedLegs.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedLegs;
+									inventoryArmorCounter++;
+									equippedLegs = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter -1 ].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedRing.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedRing;
+									inventoryArmorCounter++;
+									equippedRing = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedFeet.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedFeet;
+									inventoryArmorCounter++;
+									equippedFeet = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedGloves.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedGloves;
+									inventoryArmorCounter++;
+									equippedGloves = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+							
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedShield.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedShield;
+									inventoryArmorCounter++;
+									equippedShield = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+							
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedAmulet.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedAmulet;
+									inventoryArmorCounter++;
+									equippedAmulet = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+						
+						try{
+							if(toTextArea.contentEquals(unequipKey + equippedBack.getName())){
+								
+									inventoryArmor[inventoryArmorCounter] = equippedBack;
+									inventoryArmorCounter++;
+									equippedBack = null;
+									info.appendText("You unequip the " + inventoryArmor[inventoryArmorCounter-1].getName() + "\n");
+									if(equipBool){
+										updateEquipment();}
+									if(inventoryBool){
+										updateInventory();}
+								
+									
+								}
+							}catch(NullPointerException e){
+								
+							}
+					}
+						
+					
+					
+					//Talk talk to
+					else if(toTextArea.startsWith(talkToKey)){try{
+						areaNPCs = getAreaNPCs(locX, locY, locZ);
+						if(toTextArea.contentEquals("talk to " + areaNPCs[0].getName())){
+							currentNPC = areaNPCs[0];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;
+																						}
+						
+						else if(toTextArea.contentEquals("talk to " + areaNPCs[1].getName())){
+							currentNPC = areaNPCs[1];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;}
+						
+						else if(toTextArea.contentEquals("talk to " + areaNPCs[2].getName())){
+							currentNPC = areaNPCs[2];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;
+																						}
+						
+						else if(toTextArea.contentEquals("talk to " + areaNPCs[3].getName())){
+							currentNPC = areaNPCs[3];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;
+																						}
+						
+						else if(toTextArea.contentEquals("talk to " + areaNPCs[4].getName())){
+							currentNPC = areaNPCs[4];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;
+																						}
+						
+						else if(toTextArea.contentEquals("talk to " + areaNPCs[5].getName())){
+							currentNPC = areaNPCs[5];
+							info.appendText("You say hello to " + currentNPC.getName() + "\n");
+							info.appendText(currentNPC.getQuestions()+ "\n10: Stop Chatting\n");
+							chatBool = true;
+																						}
+					}catch(NullPointerException e){}
+						
+					
+					
+					
+					
+					
+					}
+					//HOME TELE
+					else if(entry.getText().contentEquals(homeKey)){
+						
+						info.appendText("You arrange a summoning circle\n\n");
+						
+						
+						info.appendText("You begin to kindle a fire...\n\n");
+						
+						info.appendText("As the fire grows in intensity, the fabrics of reality rent apart into a void. "
+								+ "You step into: ");
+					
+						locX = 0;
+						locY = 0;
+						locZ = 0;
+						
+						
+						currentArea = getArea(locX,locY,locZ);
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						
+						info.appendText(currentArea.getAreaInfo());
+						
+						
+						info.appendText("\n");
+					}
+					//PARTY
+					else if(entry.getText().contentEquals(partyKey)){
+						partyPanelBool = true;
+						equipBool = false;
+						notesBool = false;
+						updatePartyPanel();
+					}
+					
+					//INVENTORY
+					else if(entry.getText().contentEquals(invKey)){
+						updateInventory();
+						inventoryBool = true;
+						questBool = false;
+					}
+					//NOTES
+					
+					else if(entry.getText().contentEquals(notesKey)){
+						notesBool = true;
+						equipBool = false;
+						partyPanelBool = false;
+						info.appendText("Type <addnotes> to edit your notes\n\n");
+						menuInfo3.setText(notes+"\n\n"
+								+ ""
+								+ "");
+					}
+					//LOOK HERE
+					else if(entry.getText().contentEquals(lookHereKey)){
+						currentArea = getArea(locX,locY,locZ);
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						 areaArmor = getAreaArmor(locX,locY,locZ);
+						 areaItems = getAreaItems(locX,locY,locZ);
+						info.appendText(currentArea.getAreaInfo());
+						info.appendText("-----items-----\n\n");
+						int i = 0;
+						while(areaWeapons[i] != null){
+							info.appendText(areaWeapons[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaArmor[i] != null){
+							info.appendText(areaArmor[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaItems[i] != null){
+							info.appendText(areaItems[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("-----NPCs-----\n\n");
+						
+						i = 0;
+						while(areaNPCs[i] != null){
+							info.appendText(areaNPCs[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("\n");
+						}
+				
+				/*	//LOOK WEST
+					else if(entry.getText().contentEquals(lookWestKey)){
+						locX = locX - 1;
+						areaInfo = Update.getAreaInfo(locX,locY);
+						
+						info.appendText(areaInfo);
+						
+						
+						info.appendText("\n");
+						locX = locX +1;
+					}
+					
+					//LOOK EAST
+					else if(entry.getText().contentEquals(lookEastKey)){
+						locX = locX + 1;
+						areaInfo = Update.getAreaInfo(locX,locY);
+						
+						info.appendText(areaInfo);
+						
+						
+						info.appendText("\n");
+						locX = locX - 1;
+						
+					}
+					//LOOK SOUTH
+					else if(entry.getText().contentEquals(lookSouthKey)){
+						locY = locY - 1;
+						areaInfo = Update.getAreaInfo(locX,locY);
+						
+						info.appendText(areaInfo);
+					
+						info.appendText("\n");
+						locY = locY +1;
+					}
+					//LOOK NORTH
+					else if(entry.getText().contentEquals(lookNorthKey)){
+						locY = locY + 1;
+						areaInfo = Update.getAreaInfo(locX,locY);
+						
+						
+						info.appendText(areaInfo);
+						
+						
+						info.appendText("\n");
+						locY = locY -1;
+					}*/
+					
+					//Targeting
+					else if(entry.getText().contentEquals("target ")){
+						info.appendText("this is a test.\n");
+						return;
+					}
+					
+					
+					//WALK NORTH
+					else if(entry.getText().contentEquals(walkNorthKey)){
+						
+						if (currentArea.getGoNorth()){
+						walkSoundPlayer.play();
+						locY = locY + 1;
+						
+						if(partyCounter > 0){for(int x = 0; x <partyCounter; x++){try{
+							
+								party[x].setLocX(locX);
+								party[x].setLocY(locY);
+								party[x].setLocZ(locZ);
+							}
+						catch(NullPointerException d){
+							
+						}}}
+						
+							try{mediaPlayer.stop();}
+						catch(NullPointerException e){
+							
+						}
+						currentArea = getArea(locX,locY,locZ);
+						sound = new Media(new File(currentArea.getSound()).toURI().toString());
+						mediaPlayer = new MediaPlayer(sound);					
+						mediaPlayer.setVolume(.5);
+						mediaPlayer.play();
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						setEnemies(areaNPCs);
+						
+						
+						try{System.out.println("Enemy: " + enemies[0].getName());}catch(NullPointerException e){}//for testing puposes only
+						
+						
+						if(enemies[0]!= null){
+							combatBool = true;
+							info.appendText("Enemies: ");
+							
+							for(int i = 0; enemies[i]!=null;i++){
+								info.appendText("| "+enemies[i].getName() + " |");
+							}
+
+							info.appendText("\nBegin Combat!\n");
+							//engageCombat();
+							return;
+						}
+						
+						
+						
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						areaItems = getAreaItems(locX,locY,locZ);
+						areaArmor = getAreaArmor(locX,locY,locZ);
+						info.appendText(currentArea.getAreaInfo());
+						info.appendText("-----items-----\n");
+						int i = 0;
+						while(areaWeapons[i] != null){
+							info.appendText(areaWeapons[i].getName() + "\n");
+							i++;
+						}
+						i =0;
+						while(areaItems[i] != null){
+							info.appendText(areaItems[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaArmor[i] != null){
+							info.appendText(areaArmor[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("-----NPCs-----\n");
+						
+						i = 0;
+						while(areaNPCs[i] != null){
+							info.appendText(areaNPCs[i].getName() + "\n");
+							i++;
+						}
+						}else{info.appendText("You can't go that way.\n");}
+						
+						
+					}
+					//WALK SOUTH
+					
+					else if(entry.getText().contentEquals(walkSouthKey)){
+						if(currentArea.getGoSouth()){
+						walkSoundPlayer.play();
+						locY = locY - 1;
+						if(partyCounter > 0){for(int x = 0; x <partyCounter; x++){try{
+							
+							party[x].setLocX(locX);
+							party[x].setLocY(locY);
+							party[x].setLocZ(locZ);
+						}
+					catch(NullPointerException d){
+						
+					}}}
+						try{mediaPlayer.stop();}
+						catch(NullPointerException e){
+							
+						}
+						currentArea = getArea(locX,locY,locZ);
+						sound = new Media(new File(currentArea.getSound()).toURI().toString());
+						mediaPlayer = new MediaPlayer(sound);					
+						mediaPlayer.setVolume(.5);
+						mediaPlayer.play();
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						areaItems = getAreaItems(locX,locY,locZ);
+						areaArmor = getAreaArmor(locX,locY,locZ);
+						info.appendText(currentArea.getAreaInfo());
+						info.appendText("-----Items-----\n");
+						int i = 0;
+						while(areaWeapons[i] != null){
+							info.appendText(areaWeapons[i].getName() + "\n");
+							i++;
+						}
+						i =0;
+						while(areaItems[i] != null){
+							info.appendText(areaItems[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaArmor[i] != null){
+							info.appendText(areaArmor[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("-----NPCs-----\n");
+						
+						i = 0;
+						while(areaNPCs[i] != null){
+							info.appendText(areaNPCs[i].getName() + "\n");
+							i++;
+						}
+						}else{info.appendText("You can't go that way.\n");}
+						
+					}
+					//WALK WEST
+					
+					else if(entry.getText().contentEquals(walkWestKey)){
+						if(currentArea.getGoWest()){
+						walkSoundPlayer.play();
+						locX = locX - 1;
+						if(partyCounter > 0){for(int x = 0; x <partyCounter; x++){try{
+							
+							party[x].setLocX(locX);
+							party[x].setLocY(locY);
+							party[x].setLocZ(locZ);
+						}
+					catch(NullPointerException d){
+						
+					}}}
+						try{mediaPlayer.stop();}
+						catch(NullPointerException e){
+							
+						}
+						currentArea = getArea(locX,locY,locZ);
+						sound = new Media(new File(currentArea.getSound()).toURI().toString());
+						mediaPlayer = new MediaPlayer(sound);					
+						mediaPlayer.setVolume(.5);
+						mediaPlayer.play();
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						areaItems = getAreaItems(locX,locY,locZ);
+						areaArmor = getAreaArmor(locX,locY,locZ);
+						info.appendText(currentArea.getAreaInfo());
+						info.appendText("-----Items-----\n");
+						int i = 0;
+						while(areaWeapons[i] != null){
+							info.appendText(areaWeapons[i].getName() + "\n");
+							i++;
+						}
+						i =0;
+						while(areaItems[i] != null){
+							info.appendText(areaItems[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaArmor[i] != null){
+							info.appendText(areaArmor[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("-----NPCs-----\n");
+						
+						i = 0;
+						while(areaNPCs[i] != null){
+							info.appendText(areaNPCs[i].getName() + "\n");
+							i++;
+						}
+						}else{info.appendText("You can't go that way.\n");}
+						
+					}
+					//WALK EAST
+					
+					else if(entry.getText().contentEquals(walkEastKey)){
+						if(currentArea.getGoEast()){
+						walkSoundPlayer.play();
+						locX = locX + 1;
+						if(partyCounter > 0){for(int x = 0; x <partyCounter; x++){try{
+							
+							party[x].setLocX(locX);
+							party[x].setLocY(locY);
+							party[x].setLocZ(locZ);
+						}
+					catch(NullPointerException d){
+						
+					}}}
+						try{mediaPlayer.stop();}
+						catch(NullPointerException e){
+							
+						}
+						currentArea = getArea(locX,locY,locZ);
+						sound = new Media(new File(currentArea.getSound()).toURI().toString());
+						mediaPlayer = new MediaPlayer(sound);					
+						mediaPlayer.setVolume(.5);
+						mediaPlayer.play();
+						areaNPCs = getAreaNPCs(locX,locY,locZ);
+						areaWeapons = getAreaWeapons(locX,locY,locZ);
+						areaItems = getAreaItems(locX,locY,locZ);
+						areaArmor = getAreaArmor(locX,locY,locZ);
+						info.appendText(currentArea.getAreaInfo());
+						info.appendText("-----Items-----\n");
+						int i = 0;
+						while(areaWeapons[i] != null){
+							info.appendText(areaWeapons[i].getName() + "\n");
+							i++;
+						}
+						i =0;
+						while(areaItems[i] != null){
+							info.appendText(areaItems[i].getName() + "\n");
+							i++;
+						}
+						i = 0;
+						while(areaArmor[i] != null){
+							info.appendText(areaArmor[i].getName() + "\n");
+							i++;
+						}
+						
+						info.appendText("-----NPCs-----\n");
+						
+						i = 0;
+						while(areaNPCs[i] != null){
+							info.appendText(areaNPCs[i].getName() + "\n");
+							i++;
+						}
+						}else{info.appendText("You can't go that way.\n");}
+						
+					}
+					//QUESTS
+					
+					else if(entry.getText().contentEquals(questsKey)){
+						questBool = true;		
+						inventoryBool = false;
+						updateQuestsPanel();
+								
+					}
+					//TIMEPLAYED
+					else if(entry.getText().contentEquals(timeKey)){
+						
+						checkTime = (System.nanoTime() / 1000000000);
+						
+						timePlayed = (checkTime - startTime)/60;
+						
+						info.appendText(formatter.format(timePlayed)+" minutes\n"
+								+ ""
+								+ "");
+					}
+					//ADDNOTES
+					else if(entry.getText().contentEquals(addNotesKey)){
+						menuInfo3.setText(notes+"\n"
+								+ ""
+								+ "");
+						info.appendText("You can now edit your notes\n");
+						notesBool=true;
+						menuInfo3.setEditable(true);
+						
+					}
+					
+					}
+					
+					// ends the chatBool false sequence of entry returns
+					if (chatBool == true && combatBool == false){
+						if(entry.getText().contentEquals("1")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse1() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						
+					}
+						else if (entry.getText().contentEquals("2")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse2() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("3")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse3() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("4")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse4() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("5")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse5() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("6")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse6() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("7")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse7() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("8")){
+							try {
+								info.appendText(currentNPC.getName() + " says: " +currentNPC.getResponse8() + "\n");
+							} catch (NullPointerException e) {	
+							}
+						}
+						//TRADE SEQUENCING
+						else if (entry.getText().contentEquals("9")){
+							try {
+								if(currentNPC.getTradeBool()){
+								Item[] npcInventoryItems = new Item[20];
+								npcInventoryItems = currentNPC.getNPCInventoryItems();
+									info.appendText(currentNPC.getName() + " says: Please, have a look at my wares\n");
+								int x = 0;
+								while(npcInventoryItems[x]!= null){
+									info.appendText(npcInventoryItems[x].getName() + "\n");
+									x++;
+								}
+								Weapon[] npcInventoryWeapons = new Weapon[20];
+								npcInventoryWeapons = currentNPC.getNPCInventoryWeapons();
+								x =0;
+								while(npcInventoryWeapons[x] != null){
+									info.appendText(npcInventoryWeapons[x].getName() + "\n");
+									x++;
+								}
+								Armor[] npcInventoryArmor = new Armor[20];
+								npcInventoryArmor = currentNPC.getNPCInventoryArmor();
+								x =0;
+								while(npcInventoryArmor[x] != null){
+									info.appendText(npcInventoryArmor[x].getName() + "\n");
+									x++;
+								}
+								
+								
+								}else{info.appendText(currentNPC.getName() + "says: Sorry, I don't have anything to sell at the moment.");}
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contains("buy")){
+							Item[] npcInventoryItems = new Item[20];
+							npcInventoryItems = currentNPC.getNPCInventoryItems();	
+							for(int s = 0;s <= 19;s++){
+								try{if(entry.getText().contentEquals("buy " + npcInventoryItems[s].getName())){
+									if(gold>=npcInventoryItems[s].getStorePrice()){
+										gold = gold - npcInventoryItems[s].getStorePrice();
+									inventoryItems[inventoryItemsCounter] = npcInventoryItems[s];
+									inventoryItemsCounter++;
+									npcInventoryItems[s] = null;
+									for(int d = s; npcInventoryItems[d+1] != null; d++){
+										npcInventoryItems[d] = npcInventoryItems[d+1];
+									}
+									if(inventoryBool){
+										updateInventory();
+									}
+									}
+									break;}}catch(NullPointerException e ){}
+							}
+							Weapon[] npcInventoryWeapons = new Weapon[20];
+							npcInventoryWeapons = currentNPC.getNPCInventoryWeapons();	
+							for(int s = 0;s <= 19;s++){
+								try{if(entry.getText().contentEquals("buy " + npcInventoryWeapons[s].getName())){
+									inventoryWeapons[inventoryWeaponsCounter] = npcInventoryWeapons[s];
+									inventoryWeaponsCounter++;
+									npcInventoryWeapons[s] = null;
+									for(int d = s; npcInventoryWeapons[d+1] != null; d++){
+										npcInventoryWeapons[d] = npcInventoryWeapons[d+1];
+									}
+									if(inventoryBool){
+										updateInventory();
+									}
+								break;}}catch(NullPointerException e ){}
+							}
+							Armor[] npcInventoryArmor = new Armor[20];
+							npcInventoryArmor = currentNPC.getNPCInventoryArmor();	
+							for(int s = 0;s <= 19;s++){
+								try{if(entry.getText().contentEquals("buy " + npcInventoryArmor[s].getName())){
+									inventoryArmor[inventoryArmorCounter] = npcInventoryArmor[s];
+									inventoryArmorCounter++;
+									npcInventoryArmor[s] = null;
+									for(int d = s; npcInventoryArmor[d+1] != null; d++){
+										npcInventoryArmor[d] = npcInventoryArmor[d+1];
+									}
+									if(inventoryBool){
+										updateInventory();
+									}
+								break;}}catch(NullPointerException e ){}
+							}
+						
+						
+						
+						}
+						else if (entry.getText().contains("sell")){
+							for(int s = 0;s <= 9;s++){
+								try{if(entry.getText().contentEquals("sell " + inventoryItems[s].getName())){
+									info.appendText(currentNPC.getName() + " says: I'll gladly buy that from you!\n");
+									gold = inventoryItems[s].getPlayerPrice() + gold;
+									
+									inventoryItemsCounter--;
+									int j = s;
+									while(inventoryItems[j] != null){
+									inventoryItems[j] = inventoryItems[j+1];
+									j++;
+									}
+								break;
+								}
+								}catch(NullPointerException e){}
+								}
+							for(int s = 0;s <= 9;s++){
+								try{if(entry.getText().contentEquals("sell " + inventoryArmor[s].getName())){
+									info.appendText(currentNPC.getName() + " says: I'll gladly buy that from you!\n");
+									gold = inventoryArmor[s].getPlayerPrice() + gold;
+									
+									inventoryArmorCounter--;
+									int j = s;
+									while(inventoryArmor[j] != null){
+									inventoryArmor[j] = inventoryArmor[j+1];
+									j++;
+									}
+								break;
+								}
+								}catch(NullPointerException e){}
+								}
+							for(int s = 0;s <= 10;s++){
+								try{if(entry.getText().contentEquals("sell " + inventoryWeapons[s].getName())){
+									info.appendText(currentNPC.getName() + " says: I'll gladly buy that from you!\n");
+									gold = inventoryWeapons[s].getPlayerPrice() + gold;
+									
+									inventoryWeaponsCounter--;
+									int j = s;
+									while(inventoryWeapons[j] != null){
+									inventoryWeapons[j] = inventoryWeapons[j+1];
+									j++;
+									}
+								break;
+								}
+								}catch(NullPointerException e){}
+								}
+							if(inventoryBool){
+								updateInventory();
+							}
+						}
+						
+						
+						else if (entry.getText().contentEquals("12")){
+							try {
+								int maxPartySize = (int) (charisma/10);
+								if(!currentNPC.getPartyBool()){
+								if(partyCounter < maxPartySize){
+								if(checkParty(currentNPC.getNPCCounter())){
+									party[partyCounter] = currentNPC;
+									partyCounter++;
+									currentNPC.setPartyBool(true);
+									//SHOULD ADD STRINGS TO NPC CLASS FOR PARTY JOIN RESPONSES, MAYBE AUDIO?
+									info.appendText(currentNPC.getName() + " says: I will gladly join your party.\n");
+									if(partyPanelBool){
+										updatePartyPanel();
+									}
+								}
+								else{info.appendText(currentNPC.getName() + " says: Sorry, but you don't meet my requirements.\n");}
+								}
+								else{info.appendText(currentNPC.getName() + " says: You have too many in your party already...perhaps you could leave someone behind.\n");}
+								}
+								else{info.appendText(currentNPC.getName() + " says: I'm already in your party...\n");}
+							} catch (NullPointerException e) {	
+							}
+						}
+						else if (entry.getText().contentEquals("11")){
+							try{if(!currentNPC.getQuest1().getQuestCompleted()){
+							
+								quests[playerQuestCounter] = currentNPC.getQuest1();
+							playerQuestCounter++;
+							currentNPC.getQuest1().setQuestStarted(true);
+							info.appendText(currentNPC.getName() + " says: " +currentNPC.getQuest1().getQuestText());
+							if(questBool){
+								updateQuestsPanel();
+							}
+						}
+							else{info.appendText(currentNPC.getName() + " says: You've already helped me with that, thanks.");
+							}}catch(NullPointerException e ){}
+						}
+					
+						
+						else if (entry.getText().contentEquals("10")){
+							info.appendText("You are no longer chatting" + "\n");
+							chatBool = false;
+						}
+					}
+					
+					if (notes.length()<=1){
+					notes = "-----Notes------\n";} //RESETS NOTES IF THERE IS NOTHING WRITTEN
+					
+					
+					
+					//ATTEMPTS TO CREATE A WORLD TIME
+					checkTime = (System.nanoTime() / 1000000000);
+					if(gameTime > 24){
+						days = days+1;				
+					}
+					gameTime = (((checkTime - startTime)/15) - (days * 24));
+							
+					if(dayBool){
+						if((21>gameTime)&&(gameTime>6)){
+							info.appendText("The sun rises in a glorious dawn.\n\n");
+							dayBool = !dayBool;
+						}
+					}
+					if(!dayBool){
+						if(gameTime>21){
+							info.appendText("The sun sets in the West and the temperature begins to drop rapidly.\n");
+							dayBool = !dayBool;
+						}
+					}				
+					
+					entry.setText("");
+				
+					//updating quests..
+					for(int d = 0; d<=playerQuestCounter; d++){
+						try{if(updateQuest(quests[d].requirementCounter)){
+							info.appendText("Congratulations you've completed: " + quests[d].getQuestName() + "!\n");
+							//put in reward here
+							quests[d].setQuestCompleted(true);
+							quests[d] = null;
+						for(int f = d; f <= playerQuestCounter; f++){
+							quests[f]= quests[f+1];
+						}
+						playerQuestCounter--;
+						if(questBool){updateQuestsPanel();}
+						break;
+						}}catch(NullPointerException e){}		
+				}
+				
+					
+					
+				 
+				
+				}
+			
+			
+		
+			}
+			});
+		
+		
+		
+		window.setScene(startScreen); // sets scene
+		window.show();
+
+	}
+
+	Button yes, no;
+	boolean answer;
+
+	final boolean display(String title, String message) {
+		Stage window = new Stage();
+		window.initModality(Modality.APPLICATION_MODAL);
+		window.setTitle(title);
+		window.setMinWidth(250);
+		Label label = new Label();
+		label.setText(message);
+		Button yes = new Button("Yes");
+		Button no = new Button("No");
+		yes.setOnAction(e -> {
+			answer = true;
+			window.setFullScreen(false);
+			window.close();
+		});
+		no.setOnAction(e -> {
+			answer = false;
+			window.setFullScreen(false);
+			window.close();
+		});
+		VBox layout = new VBox(10);
+		layout.getChildren().addAll(label, yes, no);
+		layout.setAlignment(Pos.CENTER);
+		Scene scene = new Scene(layout);
+		window.setScene(scene);
+		window.showAndWait();
+		return (answer);
+	}
+
+	
+	
+	
+	public void initializeNew(){
+		Stage window = new Stage();
+		window.initModality(Modality.APPLICATION_MODAL);
+		window.setTitle("Character Creation");
+		window.setMinWidth(800);
+		window.setMinHeight(400);
+		window.setMaxHeight(400);
+		window.setMaxWidth(800);
+		Label nameLabel = new Label("Enter your name");
+		TextField nameField = new TextField("");
+		nameField.setPromptText("Enter your name");
+		nameField.setMaxWidth(300);
+		
+		Label statInfo = new Label("You have 55 points to allocate to your initial stats!");
+		 
+		Label strengthLabel = new Label("Strength:");
+		TextField strengthField = new TextField("1");
+		strengthField.setMaxWidth(100);
+		
+		Label intelligenceLabel = new Label("	Intelligence:");
+		TextField intelligenceField = new TextField("1");
+		intelligenceField.setMaxWidth(100);
+		
+		Label wisdomLabel = new Label("Wisdom: ");
+		TextField wisdomField = new TextField("1");
+		wisdomField.setMaxWidth(100);
+		
+		Label spiritLabel = new Label("       Spirit:           ");
+		TextField spiritField = new TextField("1");
+		spiritField.setMaxWidth(100);
+		
+		Label luckLabel = new Label("Luck:       ");
+		TextField luckField = new TextField("1");
+		luckField.setMaxWidth(100);
+		
+		Label stealthLabel = new Label("       Stealth:        ");
+		TextField stealthField = new TextField("1");
+		stealthField.setMaxWidth(100);
+		
+		Label staminaLabel = new Label("Stamina:  ");
+		TextField staminaField = new TextField("1");
+		staminaField.setMaxWidth(100);
+		
+		Label dexterityLabel = new Label("      Dexterity:     ");
+		TextField dexterityField = new TextField("1");
+		dexterityField.setMaxWidth(100);
+		
+		Label resolveLabel = new Label("Resolve:  ");
+		TextField resolveField = new TextField("1");
+		resolveField.setMaxWidth(100);
+		
+		Label charismaLabel = new Label("      Charisma:     ");
+		TextField charismaField = new TextField("1");
+		charismaField.setMaxWidth(100);
+		
+		Label speedLabel = new Label("Speed:    ");
+		TextField speedField = new TextField("1");
+		speedField.setMaxWidth(100);
+		ToggleGroup race = new ToggleGroup();
+		RadioButton humanBtn = new RadioButton("Human");
+		humanBtn.setToggleGroup(race);
+		RadioButton dwarfBtn = new RadioButton("Dwarf");
+		dwarfBtn.setToggleGroup(race);
+		RadioButton elfBtn = new RadioButton("Elf");
+		elfBtn.setToggleGroup(race);
+		RadioButton orcBtn = new RadioButton("Orc");
+		orcBtn.setToggleGroup(race);
+		RadioButton faeynBtn = new RadioButton("Faeyn");
+		faeynBtn.setToggleGroup(race);
+		RadioButton gornBtn = new RadioButton("Gorn");
+		gornBtn.setToggleGroup(race);
+		
+		ToggleGroup sex = new ToggleGroup();
+		
+		RadioButton maleBtn = new RadioButton("Male");
+		maleBtn.setToggleGroup(sex);
+		RadioButton femaleBtn = new RadioButton("Female");
+		femaleBtn.setToggleGroup(sex);
+		
+		Button create = new Button("Create!");
+		Button exit = new Button("Exit");
+		TextArea gameInfo = new TextArea();
+		gameInfo.setEditable(false);
+		gameInfo.setWrapText(true);
+		gameInfo.setMaxWidth(275);
+		gameInfo.setMinHeight(300);
+		
+		create.setOnAction(e -> {
+			
+			 try
+			    {
+			//A BUNCH OF ATTEMPTS AT CATCHING ERRORS IN CREATE SUBMISSION
+				 if(((Integer.parseInt(strengthField.getText()) > 0)&&
+						 (Integer.parseInt(wisdomField.getText()) > 0)&&
+						 (Integer.parseInt(intelligenceField.getText()) > 0)&&
+						 (Integer.parseInt(dexterityField.getText()) > 0)&&
+						 (Integer.parseInt(charismaField.getText()) > 0)&&
+						 (Integer.parseInt(resolveField.getText()) > 0)&&
+						 (Integer.parseInt(stealthField.getText()) > 0)&&
+						 (Integer.parseInt(speedField.getText()) > 0)&&
+						 (Integer.parseInt(luckField.getText()) > 0)&&
+						 (Integer.parseInt(staminaField.getText()) > 0)&&
+						 (Integer.parseInt(spiritField.getText()) > 0)&&
+					((Integer.parseInt(strengthField.getText())+
+					Integer.parseInt(wisdomField.getText())+
+					Integer.parseInt(intelligenceField.getText())+
+					Integer.parseInt(dexterityField.getText())+
+					Integer.parseInt(charismaField.getText())+
+					Integer.parseInt(resolveField.getText())+
+					Integer.parseInt(stealthField.getText())+
+					Integer.parseInt(speedField.getText())+
+					Integer.parseInt(luckField.getText())+
+					Integer.parseInt(staminaField.getText())+
+					Integer.parseInt(spiritField.getText())) <= 55))&&
+					
+					((Integer.parseInt(strengthField.getText())+
+							Integer.parseInt(wisdomField.getText())+
+							Integer.parseInt(intelligenceField.getText())+
+							Integer.parseInt(dexterityField.getText())+
+							Integer.parseInt(charismaField.getText())+
+							Integer.parseInt(resolveField.getText())+
+							Integer.parseInt(stealthField.getText())+
+							Integer.parseInt(speedField.getText())+
+							Integer.parseInt(luckField.getText())+
+							Integer.parseInt(staminaField.getText())+
+							Integer.parseInt(spiritField.getText())) > 0) &&
+					(nameField.getText().length() > 0) && (maleBtn.isSelected()||femaleBtn.isSelected()) && 
+					(humanBtn.isSelected()||orcBtn.isSelected()||faeynBtn.isSelected()||elfBtn.isSelected()||dwarfBtn.isSelected()||gornBtn.isSelected()))
+					
+			{
+				//SETTING STATS
+				this.strength = Integer.parseInt(strengthField.getText());
+				this.wisdom = Integer.parseInt(wisdomField.getText());
+				this.intelligence = Integer.parseInt(intelligenceField.getText());
+				this.dexterity = Integer.parseInt(dexterityField.getText());
+				this.charisma = Integer.parseInt(charismaField.getText());
+				this.resolve = Integer.parseInt(resolveField.getText());
+				this.stealth = Integer.parseInt(stealthField.getText());
+				this.speed = Integer.parseInt(speedField.getText());
+				this.luck = Integer.parseInt(luckField.getText());
+				this.stamina = Integer.parseInt(staminaField.getText());
+				this.spirit = Integer.parseInt(spiritField.getText());
+				
+				this.playerName = nameField.getText();
+				//SETTING RACE
+				if (humanBtn.isSelected()){
+				this.playerRace = "Human";
+				this.welcomeText = "	The light of the world flows through the gardens of time and so to your path. Each decision a partition, and as such, a blossom."
+						+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				else if (faeynBtn.isSelected()){
+					this.playerRace = "Faeyn";
+					this.welcomeText = "	The winds of the world flow through the steppes of time, and so to your path. Each decision a partition, and as such, a blossom."
+							+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				else if (dwarfBtn.isSelected()){
+					this.playerRace = "Dwarven";
+					this.welcomeText = "	The essence of the world flows through the halls tf time, and so to your path. Each decision a partition, and as such, a blossom."
+							+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				else if (orcBtn.isSelected()){
+					this.playerRace = "Orcish";
+					this.welcomeText = "	The spirit of the world flows through the strands of time, and so to your path. Each decision a partition, and as such, a blossom."
+							+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				else if (elfBtn.isSelected()){
+					this.playerRace = "Elven";
+					this.welcomeText = "	The buds of the world flow through the forests of time, and so to your path. Each decision a partition, and as such, a blossom."
+							+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				else if (gornBtn.isSelected()){
+					this.playerRace = "Gornish";
+					this.welcomeText = "	The shards of the world flow through the mountains of time, and so to your path. Each decision a partition, and as such, a blossom."
+							+ "\n\nWelcome to Valgnar, first time players are highly recommended to type <help>\n";
+				
+				
+				}
+				//SETTING SEX
+				if (maleBtn.isSelected()){
+					this.playerSex = "Male";
+					}
+				else if (femaleBtn.isSelected()){
+						this.playerSex = "Female";
+					}
+				//SETTING OTHER ATTRIBUTES
+				/*	this.locX = ;
+					this.locY = ;
+				*/
+				this.hp = (int) ((stamina * 30) + (resolve*15) + (15*luck*Math.random()));
+				this.currentHp = this.hp;
+				this.mana = (int) ((intelligence * 50) + (wisdom * 50) + (spirit * 100));
+				this.renown = 1;
+				this.honor = 50;
+				this.popularity = 1;
+				this.fatigue = 100;
+				gameInfo.setText("Success");
+				 window.setFullScreen(false);
+					window.close();
+				
+			}
+			else {gameInfo.setText("You must have between 0 and 55 integer points to start!"
+					+ "\nYour name must be at least one character in length!"
+					+ "\nYou must choose a sex!"
+					+ "\nYou must choose a race!");
+			    
+			    }
+			    }
+			 catch (NumberFormatException nfe)
+			    {
+			      gameInfo.setText("Please enter valid integers for your stats or check your character name, then try again.");
+			    }
+			
+			
+		
+			
+			
+		
+		
+		
+		
+		
+		
+		});
+		exit.setOnAction(e -> {
+			
+			window.setFullScreen(false);
+			window.close();
+		});
+		VBox layoutLeft = new VBox(10);
+		HBox layoutLeft1 = new HBox(0);
+		HBox layoutLeft2 = new HBox(0);
+		HBox layoutLeft3 = new HBox(0);
+		HBox layoutLeft4 = new HBox(0);
+		HBox layoutLeft5 = new HBox(0);
+		HBox layoutLeft6 =  new HBox(0);
+		
+		layoutLeft1.getChildren().addAll(strengthLabel,strengthField,intelligenceLabel, intelligenceField);
+		layoutLeft2.getChildren().addAll(wisdomLabel,wisdomField,spiritLabel,spiritField);
+		layoutLeft3.getChildren().addAll(luckLabel,luckField,stealthLabel,stealthField);
+		layoutLeft4.getChildren().addAll(staminaLabel,staminaField,dexterityLabel,dexterityField);
+		layoutLeft5.getChildren().addAll(resolveLabel,resolveField,charismaLabel,charismaField);
+		layoutLeft6.getChildren().addAll(speedLabel,speedField);
+		
+		layoutLeft.getChildren().addAll(nameLabel,nameField,statInfo,layoutLeft1,layoutLeft2,layoutLeft3,layoutLeft4,layoutLeft5,layoutLeft6);
+		layoutLeft.setOnKeyPressed(e -> {try{
+			int statsLeft = 55 - (Integer.parseInt(strengthField.getText())+
+					Integer.parseInt(wisdomField.getText())+
+					Integer.parseInt(intelligenceField.getText())+
+					Integer.parseInt(dexterityField.getText())+
+					Integer.parseInt(charismaField.getText())+
+					Integer.parseInt(resolveField.getText())+
+					Integer.parseInt(stealthField.getText())+
+					Integer.parseInt(speedField.getText())+
+					Integer.parseInt(luckField.getText())+
+					Integer.parseInt(staminaField.getText())+
+					Integer.parseInt(spiritField.getText()));
+			statInfo.setText("You have " + statsLeft + " points to allocate to your initial stats!");
+			
+		}catch(NumberFormatException d){}});
+		
+		VBox layoutRight = new VBox(10);
+		
+		
+		HBox layoutRightTop = new HBox(10);
+		
+		
+		HBox layoutRightBot = new HBox(10);
+		
+		layoutRightTop.getChildren().addAll(humanBtn,dwarfBtn,elfBtn,orcBtn,faeynBtn,gornBtn);
+		layoutRightBot.getChildren().addAll(maleBtn,femaleBtn,create, exit);
+		
+		humanBtn.setOnAction(e -> gameInfo.setText("	 Humans are the current powerhouse of Valgnar. Their reach spreads from"
+				+ " the Isles of Hope in the West, to the vast Dune Sea in the East, under many banners. Their technologies are rarely surpassed and they are the only "
+				+ "race on Valgnar to make oceanic exploration and settlement habitual; as expressed by their many island kingdoms. Human expansion is only "
+				+ "slowed or halted when met by opposition from the other races. Because of their breadth and wealth, most humans are quite intelligent "
+				+ "compared to the other races. While humans are numerous, so to are their allegiances "
+				+ "and in that regard they are a frail and fragmented race rife with politics and squabbling.\n\n    "
+				+ "Humans are CUNNING, and have increased Resolve, Intelligence, Stealth, Luck, and Charisma"));
+		
+		dwarfBtn.setOnAction(e -> gameInfo.setText("     Any dwarf will proudly boast that they "
+				+ "are the oldest of the races within Valgnar. Having a shorter stout build, dwarves are known to be sturdy, resolute, and honorable;"
+				+ " they abode in the numerous mountainous regions of the world choosing a life of solace, although it is heavily contested by the Gornish.\n"
+				+ "  They winter deep in their mountain halls"
+				+ " with an abundance of mead and merry, fancifully awaiting the time "
+				+ "when they once again roam freely on the high passes. They number highly in craftsmen "
+				+ "and skilled warriors. Their longevity gives their people's a higher understanding"
+				+ " of the fabric of reality in which they are woven.\n\n    "
+				+ "Dwarves are STALWART, and have increased Spirit, Resolve, Stamina, Strength, and Wisdom."));
+		
+		elfBtn.setOnAction(e -> gameInfo.setText("	 Breaking mighty waves over earthen boats with woven vines for sails, the coming of the elves "
+				+ "to Perth marked the beginning of the Second Age. Wiry and tall"
+				+ " with quick wit, dry humor, and a deep passion for their world; their peoples power was unparalelled and their peoples covered most of the continent."
+				+ "When humans first arrived, their expansion was slow, and for a while the elves and humans lived in balance with"
+				+ " similar populations. However the elves were soon outnumbered by the crowding raccous humans; choosing solitude over power their peoples "
+				+ "migrated to"
+				+ " deep within the forests to study and commune."
+				+ "They are now few in number, but rich in knowledge and purpose, having tightly-knit communities.\n\n    "
+				+ "Elves are WRY, and have increased: \nIntelligence \nWisdom \nSpirit \nSpeed \nDexterity"));
+		
+		orcBtn.setOnAction(e -> gameInfo.setText("	Orcish lore tells of a time where they dwelled beyond the Stairway to the Heavens an intimidatingly large serious of peaks that slash "
+				+ " through the continent of Perth separating the more hospitable Southern region from the massive glacial expanse of the North. Mid-way through the second age, in a time"
+				+ "of incredible hardship, small bands"
+				+ "of Orcs began to drift South seeking warmer climate, food to eat, and above all, a place to thrive. Their peoples were warlike and hostile, yet cunning and strong."
+				+ " No longer needing to live a nomadic lifestyle seeking food, Orcish culture and technology rapdily developed. Still, as a new race to"
+				+ " the Southern Basin, they were met with resentment from the other races, and are hindered from easy expansion, for now.\n\n"
+				+ "Orcs are RESILIENT, and have increased: \nStrength, Stamina, Speed, Resolve, and Health."));
+		
+		gornBtn.setOnAction(e -> gameInfo.setText("	The Gorns are a mysterious race. Seldom seen in groups of more than three they mostly live"
+				+ " in an intricate series of massive caverns beneath the ground, harnessing the energy of natural bioluminescent crystals "
+				+ " for metallurgy and cooking. They are natural miners and movers of the earth, a deeply introspective race, yet sheltered in their own doing."
+				+ " They are the natural enemy of the Dwarves who compete for this massive subterranean domain; rich in metals and gems, and above all"
+				+ "space and solitude. There is a long history of Cavern Wars spanning well into antiquity and permeating the present clime of both races."
+				+ "\n\nGorns are TENACIOUS, and have increased: \nIntelligence\nWisdom\nSpirit\nMana\nResolve"));
+		
+		faeynBtn.setOnAction(e -> gameInfo.setText("	Shephards of the wind; the keepers of the high steppes. While both races generally fiercly deny it, they Faeyn are distant"
+				+ " kin of the Elves. A reserved and stoic peoples, they do not have any major cities, instead preferring to live in easily erected canvas pavillions, "
+				+ "isolated or in small groups. Deeply spiritual the Faeyn regularly practice shamanistic rituals for a plethora of purposes, such as "
+				+ "controlling the weather or imbuing the land with the spirit's of passed kin. As the areas they inhabit are usually"
+				+ "lacking in material resources, the Faeyn have no natural enemies except those that would"
+				+ " seek to alter their way of life.\n\n"
+				+ "Faeyn are ARCANE, and have increased: \nIntelligence\nWisdom\nSpirit\nLuck\nDexterity "));
+		
+		layoutRight.getChildren().addAll(layoutRightTop, layoutRightBot, gameInfo);
+		BorderPane layout = new BorderPane();
+		layout.getStylesheets().add
+		 (GameStart.class.getResource("InitializeCSS.css").toExternalForm());
+		layout.setLeft(layoutLeft);
+		layout.setRight(layoutRight);
+		
+		Scene scene = new Scene(layout);
+		window.setScene(scene);
+		window.showAndWait();
+		
+		
+		
+/*
+		this.playerName = 
+		 hp;
+		mana;
+		
+			strength;
+			wisdom;
+			intelligence;
+			dexterity;
+			charisma;
+			reslove;
+			stealth;
+			speed;
+			luck;
+			stamina;
+			spirit;
+		
+		int renown;
+		int honor;
+		int popularity;
+		
+		string race;
+		int locX;
+		int locY;
+		*/
+		
+	}
+	public Area getArea(int locX, int locY, int locZ){
+		for(int i = 0; i < 100; i++){
+			try{ 
+				if((allAreas[i].getLocX() == this.locX) && (allAreas[i].getLocY() == this.locY)&& (allAreas[i].getLocZ() == this.locZ)){
+				currentArea = allAreas[i];
+				break;
+			}}catch(NullPointerException e){		 
+			}
+		}
+		return currentArea;	
+	}
+	
+	
+	public Weapon[] getAreaWeapons(int locX, int locY, int locZ){	
+		int y = 49;
+		int areaWeaponsCounter = 0;  
+		int allAreaWeaponsCounter = 0;
+		Weapon[] areaWeapons = new Weapon[50];
+		
+							
+				 while(y >= allAreaWeaponsCounter){
+					try{
+						if(((allAreaWeapons[allAreaWeaponsCounter].getLocX()==locX))&&((allAreaWeapons[allAreaWeaponsCounter].getLocY()==locY))&&((allAreaWeapons[allAreaWeaponsCounter].getLocZ()==locZ))&&((allAreaWeapons[allAreaWeaponsCounter].getVisiBool()==true))){
+						 areaWeapons[areaWeaponsCounter] = allAreaWeapons[allAreaWeaponsCounter];		
+						// System.out.println(areaWeapons[areaWeaponsCounter].getName());
+						 areaWeaponsCounter++;
+						}
+						}
+					catch(NullPointerException e){		 
+						}
+					allAreaWeaponsCounter++;
+				 } 
+		return areaWeapons;
+															}
+	
+	
+	public String getAreaSounds(int locX, int locY, int locZ){
+		String sound = new String();
+		sound = currentArea.getSound();
+		return sound;
+	}
+	public void updateInventory(){
+		menuInfo2.setText("-----Inventory------\n"
+				+ "Gold: " + gold
+				+ "\n\n");
+		for(int i = 0; i<=inventoryWeaponsCounter; i++){
+			try{
+				menuInfo2.appendText(inventoryWeapons[i].getName() + "\n");
+			}catch(NullPointerException e){}
+		}
+		for(int i = 0; i<=inventoryArmorCounter; i++){
+			try{
+				menuInfo2.appendText(inventoryArmor[i].getName() + "\n");
+			}catch(NullPointerException e){}
+		}
+		for(int i = 0; i<=inventoryItemsCounter; i++){
+			try{
+				menuInfo2.appendText(inventoryItems[i].getName() + "\n");
+			}catch(NullPointerException e){}
+		}
+		
+	}
+	
+	
+	public NPC[] getAreaNPCs(int locX, int locY, int locZ){	
+		int y = 49;
+		int areaNPCsCounter = 0;  
+		int allAreaNPCsCounter = 0;
+		NPC[] areaNPCs = new NPC[50];
+		
+							
+				 while(y >= allAreaNPCsCounter){
+					try{
+						if(((allAreaNPCs[allAreaNPCsCounter].getLocX()==locX))&&((allAreaNPCs[allAreaNPCsCounter].getLocY()==locY))&&((allAreaNPCs[allAreaNPCsCounter].getLocZ()==locZ))&&((allAreaNPCs[allAreaNPCsCounter].getVisiBool()==true))){
+						 areaNPCs[areaNPCsCounter] = allAreaNPCs[allAreaNPCsCounter];		
+						 
+						 areaNPCsCounter++;
+						}
+						}
+					catch(NullPointerException e){		 
+						}
+					allAreaNPCsCounter++;
+				 } 
+		return areaNPCs;
+															}
+	
+	public void updateEquipment(){
+		menuInfo3.setText("-----Equipment------\n\n\n");
+		
+		try{menuInfo3.appendText("Weapon: "+ equippedWeapon.getName()
+				+ "\n");}
+		catch(NullPointerException e){}
+		try{menuInfo3.appendText("Head: "+ equippedHead.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Shield: "+ equippedShield.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Ring: "+ equippedRing.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Chest: "+ equippedChest.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Legs: "+ equippedLegs.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Gloves: "+ equippedGloves.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+		try{menuInfo3.appendText("Feet: "+ equippedFeet.getName()
+		+ "\n");}
+catch(NullPointerException e){}
+	}
+
+	
+	public boolean updateQuest(int reqCounter){
+		
+		
+		Boolean c = false;
+		//requirements for first quest
+		if(reqCounter == 1){
+			
+			for(int i = 0; i <=10; i++){
+				try{
+					if(inventoryItems[i].getName() == "Silver Necklace"){
+						c = true;
+						getQuestRewards(reqCounter);
+						if(statsBool){updateStats();}
+						if(inventoryBool){updateInventory();}
+				}
+				
+			}catch(NullPointerException | ArrayIndexOutOfBoundsException e){}
+		
+								}
+				
+		}
+		return c;
+	}
+
+	public void getQuestRewards(int reqCounter){
+		
+		if(reqCounter == 1){
+			charisma = charisma + 1;
+			gold = gold + 50;
+			strength = strength + 1;
+			info.appendText("Your Charisma and Strength have both increased by 1.\n" + currentNPC.getName() +" gives you 50 gold.\n");
+		}
+		
+		
+	}
+	
+	
+	
+	public boolean checkParty(int npcCounter){ //FRED
+		boolean c = false;
+		if(npcCounter == 0){
+			if(honor >= 40 && charisma>=10 && intelligence>=10){
+				c = true;
+			}
+			
+		}
+		else if(npcCounter == 1){ //SNR.SGT.THOMAS
+			if(honor >=50){
+				c = true;
+			}
+		}
+		else if(npcCounter ==2){
+			
+		}
+		else if(npcCounter ==3){
+			
+		}
+		
+		
+		
+		
+		return c;
+		
+	}
+
+	public Item[] getAreaItems(int locX, int locY, int locZ){	
+		int y = 49;
+		int areaItemsCounter = 0;  
+		int allAreaItemsCounter = 0;
+		Item[] areaItems = new Item[50];
+		
+							
+				 while(y >= allAreaItemsCounter){
+					try{
+						if(((allItems[allAreaItemsCounter].getLocX()==locX))&&((allItems[allAreaItemsCounter].getLocY()==locY))&&((allItems[allAreaItemsCounter].getLocZ()==locZ))&&((allItems[allAreaItemsCounter].getVisiBool()==true))){
+						 areaItems[areaItemsCounter] = allItems[allAreaItemsCounter];		
+						
+						 areaItemsCounter++;
+						}
+						}
+					catch(NullPointerException e){		 
+						}
+					allAreaItemsCounter++;
+				 } 
+		return areaItems;
+	}
+	public void updateQuestsPanel(){
+		
+		menuInfo2.setText("-----Quests-----\n");
+		for(int i =0; i<= playerQuestCounter; i++){try{
+			menuInfo2.appendText(quests[i].getQuestName() + "\n");}catch(NullPointerException e){}
+
+		}
+	}
+
+	public Armor[] getAreaArmor(int locX, int locY, int locZ){	
+		int y = 49;
+		int areaArmorCounter = 0;  
+		int allAreaArmorCounter = 0;
+		Armor[] areaArmor = new Armor[50];
+		
+							
+				 while(y >= allAreaArmorCounter){
+					try{
+						if(((allArmor[allAreaArmorCounter].getLocX()==locX))&&((allArmor[allAreaArmorCounter].getLocY()==locY))&&((allArmor[allAreaArmorCounter].getLocZ()==locZ))&&((allArmor[allAreaArmorCounter].getVisiBool()==true))){
+						 areaArmor[areaArmorCounter] = allArmor[allAreaArmorCounter];		
+						// System.out.println(areaWeapons[areaWeaponsCounter].getName());
+						 areaArmorCounter++;
+						}
+						}
+					catch(NullPointerException e){		 
+						}
+					allAreaArmorCounter++;
+				 } 
+		return areaArmor;
+															}
+public void updatePartyPanel(){
+	menuInfo3.setText("-----Party------\n");
+	for(int c = 0; c<=partyCounter; c++){try{
+menuInfo3.appendText(party[c].getName() + "\n");
+	}catch(NullPointerException e){}
+	}
+}
+public void updateStats(){ //method called to set menuinfo text for stats
+	menuInfo.setText("----Character Statistics----\n"
+			+ "	 ----General Stats----\n"
+			+ "Name: " + playerName + "\nRace: " + playerRace +"\nTitle:\n"
+					+ "Max Hitpoints: "+(int) ((stamina * 30) + (resolve*15) + (15*luck*Math.random()))+"\nCurrent Hitpoints: " + currentHp + "\nMana: " + (int) ((intelligence * 50) + (wisdom * 50) + (spirit * 100)) +"\nFatigue: " + fatigue +"\n"
+			+ "      ----Core Stats----\nStrength: " + strength +"\nIntelligence: " + intelligence+""
+					+ "\nStamina: "+stamina+"\nDexterity: "+dexterity+ "\nCharisma: "+charisma+""
+			+ "\nSpirit: "+spirit+"\nWisdom: "+wisdom+"\nLuck: "+luck+"\nSpeed: "+speed+""
+				+ "\nStealth: "+stealth+"\nResolve: "+resolve+"\n     ----World Stats----\n"
+			+ "Renown: "+renown+"\nHonor: "+honor+"\nPopularity: "+popularity+"\n"
+			+ "	  ----Guilds----\n");
+	
+}
+
+public void setEnemies(NPC[] areaNPCs){
+	
+	int i = 0;
+	
+	while (areaNPCs[i] != null){		
+		if(getNPCAggression(areaNPCs[i])){
+			enemies[areaEnemiesCounter] = areaNPCs[i];
+			
+			areaEnemiesCounter++;
+		}
+		i++;
+		
+		
+	}
+	
+	
+	
+}
+
+public Boolean getNPCAggression(NPC currentNPC){
+	Boolean isAgro = false;
+	if (currentNPC.getNPCCounter() == 0){
+		if(playerRace != "Human" || (currentNPC.getIsAttacked())){
+			isAgro = true;
+		}
+	}
+	
+
+	return isAgro;
+		
+	
+}
+public Boolean engageCombat(){
+	System.out.println("message1");
+	Boolean success = new Boolean(false); //Determines wether the fight is successful or not
+	combatBool = true; //Switches commands to engage enemies in combat
+	int dmgToPrimaryTarget, AOEDmg, dmgTakenSelf, dmgTakenParty;
+	//int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
+	System.out.println("message2");
+	info.appendText("You have been attacked!\n");
+	selectTarget(enemies);			
+			
+			
+	
+	
+	while(currentHp>0 && enemies[0]!= null){
+	entry.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		@Override
+		public void handle(KeyEvent event){
+			if (event.getCode() == KeyCode.ENTER){
+				
+				//COMMANDS TO USE ITEMS
+				if(entry.getText().startsWith("use ")){
+					Ability usedAbility = null;
+					for(int i = 0; playerAbilities != null; i++){
+						if(entry.getText().contentEquals("use "+ playerAbilities[i].getName())){
+							usedAbility = playerAbilities[i];
+						}
+					}
+					
+					System.out.println(calculateDamagePrimary(usedAbility));
+				}
+				//COMMANDS TO CAST SPELLS
+				else if(entry.getText().startsWith("cast ")){
+					for(int i = 0; i <= abilityCounter; i++){try{
+						if(entry.getText().contentEquals("cast " + playerAbilities[i].getName())){ //atempts to match cast name with known abilities
+							if (playerAbilities[i].getCombatBool() == true){   //Checks to see if it's a combat ability
+								
+							}
+							
+						}}catch(NullPointerException e){}
+					}
+				
+						
+						
+						}
+				
+				else if(entry.getText().contentEquals("flee")){ //Flee will return you to your previously walked location, wont be able to flee if you used
+															//other transport methods, need to update "prevLocX/prevLocY/prevLocZ" under all walk sequences
+					
+				}
+				else if(entry.getText().startsWith("equip ")){
+					
+				}
+				//Calculate changes on currentTarget
+			
+				//Check to see if dead
+				
+				//Calculate changes on other enemies
+				
+				//check to see if other enemies are dead
+				
+				//Roll random to see what party member is targeted
+				
+				//Calculate changes on party
+				
+				//Check to see if dead
+				
+				
+			}
+		}		
+	
+	}); 
+	
+	
+	
+	
+	} //This is the end of the combat sequence loop
+	
+	
+	if(currentHp > 0){
+		success = true;
+	}
+	
+	return success;
+}
+	
+public void selectTarget(NPC[] enemies){
+	
+	
+
+	info.appendText("Enemies: ");
+	
+	for(int i = 0; enemies[i]!=null;i++){
+		info.appendText(enemies[i].getName() + ", ");
+	}
+
+	System.out.println("message5");
+	
+	info.appendText("\nSelect your primary target by pressing 0 - " + (areaEnemiesCounter-1) + "\n");
+	System.out.println("message6");
+	
+	
+	entry.setOnKeyPressed(new EventHandler<KeyEvent>() {
+		
+		@Override
+		public void handle(KeyEvent event2){
+			
+			if (event2.getCode() == KeyCode.DIGIT0){
+				currentTarget = enemies[0];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				
+			}
+			else	if (event2.getCode() == KeyCode.DIGIT1){
+				try{currentTarget = enemies[1];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else	if (event2.getCode() == KeyCode.DIGIT2){
+				try{currentTarget = enemies[2];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT3){
+				try{currentTarget = enemies[3];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT4){
+				try{currentTarget = enemies[4];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT5){
+				try{currentTarget = enemies[5];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT6){
+				try{currentTarget = enemies[6];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT7){
+				try{currentTarget = enemies[7];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT8){
+				try{currentTarget = enemies[8];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+			else if (event2.getCode() == KeyCode.DIGIT9){
+				try{currentTarget = enemies[9];
+				info.appendText("Your primary target is " + currentTarget.getName()+"\n");
+				}catch(NullPointerException e){}
+			}
+	
+			
+		
+		}
+		
+	});
+	System.out.println("message8");
+	
+	
+	
+}
+	public int calculateDamagePrimary(Ability usedAbility){
+		int damage = 0;
+		//Player damage
+		damage =(int) (damage + (usedAbility.getDamage()*(intelligence)));
+		
+		
+		
+		
+		return damage;
+	}
+	
+	
+	public int calculateHealingPrimary(){
+		
+	}
+	public int calculateDamageSelf(){
+		
+	}
+
+}
