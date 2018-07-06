@@ -1,8 +1,14 @@
 #version 400 core //version of opengl
 
 
+<<<<<<< HEAD
 //someedit
 //another one
+=======
+
+
+
+>>>>>>> d5aac78f0219eef52093b90560111a04aa002f99
 in vec2 pass_textureCoords;
 in vec3 surfaceNormal;
 in vec3 toLightVector;
